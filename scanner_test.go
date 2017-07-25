@@ -1,14 +1,15 @@
-package urlscanner
+package urlscanner_test
 
-import "testing"
+import (
+	"testing"
+
+	urlscanner "github.com/ihcsim/url-scanner"
+	"github.com/ihcsim/url-scanner/internal/db"
+)
 
 func TestIsSafe(t *testing.T) {
-	// use the mock database
-	dbStoreOriginal := dbStore
-	dbStore = &InMemoryDB{}
-	defer func() {
-		dbStore = dbStoreOriginal
-	}()
+	dbStore := &db.InMemoryDB{}
+	urlScanner := urlscanner.New(dbStore)
 
 	testCases := []struct {
 		url      string
@@ -27,7 +28,7 @@ func TestIsSafe(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		actual, err := IsSafe(testCase.url)
+		actual, err := urlScanner.IsSafe(testCase.url)
 		if err != nil {
 			t.Fatal("Unexpected error: ", err)
 		}
