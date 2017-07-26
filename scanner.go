@@ -1,5 +1,7 @@
 package urlscanner
 
+import urlerr "github.com/ihcsim/url-scanner/internal/error"
+
 // URLScanner provides functionality to determine if the given URLs are malicious.
 type URLScanner struct {
 	db Database
@@ -16,6 +18,10 @@ func New(db Database) *URLScanner {
 // If the URL is a malware URL, URLInfo.IsSafe is set to true.
 // Otherwise, it's set to false.
 func (s *URLScanner) IsSafe(url string) (*URLInfo, error) {
+	if url == "" {
+		return nil, &urlerr.MalformedURLError{}
+	}
+
 	exist, err := s.db.Exist(url)
 	if err != nil {
 		return nil, err

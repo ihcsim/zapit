@@ -12,6 +12,7 @@ import (
 
 	urlscanner "github.com/ihcsim/url-scanner"
 	"github.com/ihcsim/url-scanner/internal/db"
+	urlerr "github.com/ihcsim/url-scanner/internal/error"
 )
 
 const (
@@ -72,20 +73,22 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 		err    error
 	)
 	url := strings.TrimPrefix(req.URL.Path, endpoint)
-	if url != "" {
-		result, err = scanner.IsSafe(url)
-		if err != nil {
-			responseError(w, err)
+	result, err = scanner.IsSafe(url)
+	if err != nil {
+		if urlerr.IsMalformedURLError(err) {
+			responseBadRequest(w, err)
 			return
 		}
-
-		content, err := json.Marshal(result)
-		if err != nil {
-			responseError(w, err)
-			return
-		}
-		responseOK(w, content)
+		responseError(w, err)
+		return
 	}
+
+	content, err := json.Marshal(result)
+	if err != nil {
+		responseError(w, err)
+		return
+	}
+	responseOK(w, content)
 }
 
 func serverURL() string {
@@ -96,6 +99,14 @@ func serverURL() string {
 	}
 
 	return fmt.Sprintf("%s:%s", hostname, port)
+}
+
+func responseBadRequest(w http.ResponseWriter, err error) {
+	w.WriteHeader(http.StatusBadRequest)
+	w.Header().Set("Content-Type", contentType)
+
+	content := fmt.Sprintf(`{"error": "%s"}`, err)
+	w.Write([]byte(content))
 }
 
 func responseError(w http.ResponseWriter, err error) {
