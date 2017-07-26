@@ -51,5 +51,10 @@ $ go test -v -cover -race ./...
 
 To build the server:
 ```
-$ go build -v github.com/ihcsiim/url-scanner/cmd/server/...
+$ go build -v github.com/ihcsim/url-scanner/cmd/server/...
+```
+
+To build the Docker image:
+```
+$ docker image build --rm -t <image_tag> .
 ```
