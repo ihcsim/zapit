@@ -27,11 +27,11 @@ func TestHandleURLInfo(t *testing.T) {
 		path         string
 		expectedBody []byte
 	}{
-		{path: "localhost", expectedBody: []byte(`{"url":"localhost","isSafe":true}`)},
-		{path: "127.0.0.1", expectedBody: []byte(`{"url":"127.0.0.1","isSafe":true}`)},
-		{path: "google.com", expectedBody: []byte(`{"url":"google.com","isSafe":true}`)},
-		{path: "piknichok.ru", expectedBody: []byte(`{"url":"piknichok.ru","isSafe":false}`)},
-		{path: "108.61.210.89", expectedBody: []byte(`{"url":"108.61.210.89","isSafe":false}`)},
+		{path: "localhost", expectedBody: []byte(`{"URL":"localhost","IsSafe":true}`)},
+		{path: "127.0.0.1", expectedBody: []byte(`{"URL":"127.0.0.1","IsSafe":true}`)},
+		{path: "google.com", expectedBody: []byte(`{"URL":"google.com","IsSafe":true}`)},
+		{path: "piknichok.ru", expectedBody: []byte(`{"URL":"piknichok.ru","IsSafe":false}`)},
+		{path: "108.61.210.89", expectedBody: []byte(`{"URL":"108.61.210.89","IsSafe":false}`)},
 	}
 
 	for _, testCase := range testCases {

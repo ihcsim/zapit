@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -67,19 +68,23 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 	log.Printf("GET %s", req.URL.Path)
 
 	var (
-		safe bool
-		err  error
+		result *urlscanner.URLInfo
+		err    error
 	)
 	url := strings.TrimPrefix(req.URL.Path, endpoint)
 	if url != "" {
-		safe, err = scanner.IsSafe(url)
+		result, err = scanner.IsSafe(url)
 		if err != nil {
 			responseError(w, err)
 			return
 		}
 
-		content := fmt.Sprintf(`{"url":"%s","isSafe":%t}`, url, safe)
-		responseOK(w, []byte(content))
+		content, err := json.Marshal(result)
+		if err != nil {
+			responseError(w, err)
+			return
+		}
+		responseOK(w, content)
 	}
 }
 

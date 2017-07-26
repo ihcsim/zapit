@@ -33,7 +33,7 @@ func TestIsSafe(t *testing.T) {
 			t.Fatal("Unexpected error: ", err)
 		}
 
-		if actual != testCase.expected {
+		if actual.IsSafe != testCase.expected {
 			t.Errorf("Expected URL %s to be %s", testCase.url, testCase.result)
 		}
 	}
