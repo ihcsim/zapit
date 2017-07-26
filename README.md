@@ -1,5 +1,7 @@
 # url-scanner
 
+[ ![Codeship Status for ihcsim/url-scanner](https://app.codeship.com/projects/52115f30-53eb-0135-fd18-160627fc0fd3/status?branch=master)](https://app.codeship.com/projects/235123)
+
 ## Table of Content
 
 * [Problem Description](#problem-description)
