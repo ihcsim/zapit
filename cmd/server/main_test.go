@@ -1,35 +1,64 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
+
+	urlscanner "github.com/ihcsim/url-scanner"
+	"github.com/ihcsim/url-scanner/internal/db"
 )
 
 func TestHandleURLInfo(t *testing.T) {
-	t.Run("Request Path", func(t *testing.T) {
-		buf := &bytes.Buffer{}
-		log.SetOutput(buf)
-		flags := log.Flags()
-		log.SetFlags(0)
-		defer func() {
-			log.SetOutput(os.Stdout)
-			log.SetFlags(flags)
-		}()
+	// set up scanner
+	db := &db.InMemoryDB{}
+	scanner = urlscanner.New(db)
 
-		path := "/localhost/account/hack"
+	log.SetOutput(ioutil.Discard)
+	defer func() {
+		log.SetOutput(os.Stdout)
+	}()
+
+	var testCases = []struct {
+		path         string
+		expectedBody []byte
+	}{
+		{path: "localhost", expectedBody: []byte(`{"url":"localhost","isSafe":true}`)},
+		{path: "127.0.0.1", expectedBody: []byte(`{"url":"127.0.0.1","isSafe":true}`)},
+		{path: "google.com", expectedBody: []byte(`{"url":"google.com","isSafe":true}`)},
+		{path: "piknichok.ru", expectedBody: []byte(`{"url":"piknichok.ru","isSafe":false}`)},
+		{path: "108.61.210.89", expectedBody: []byte(`{"url":"108.61.210.89","isSafe":false}`)},
+	}
+
+	for _, testCase := range testCases {
+		path := fmt.Sprintf("%s%s", endpoint, testCase.path)
 		testRequest := httptest.NewRequest("GET", path, nil)
-		handleURLInfo(nil, testRequest)
+		testResponseWriter := httptest.NewRecorder()
+		handleURLInfo(testResponseWriter, testRequest)
 
-		expected := fmt.Sprintf("GET %s%s", endpoint, path)
-		if actual := strings.TrimSpace(buf.String()); actual != expected {
-			t.Errorf("Expected request to be %q, but got %q", expected, actual)
+		actualHeader := testResponseWriter.Header()
+		if actual := actualHeader.Get("Content-Type"); contentType != actual {
+			t.Errorf("Mismatch response content type. Expected %q, but got %q", contentType, actual)
 		}
-	})
+
+		actualResponse := testResponseWriter.Result()
+		if actualResponse.StatusCode != http.StatusOK {
+			t.Errorf("Mismatch HTTP response status code. Expected %q, but got %q", http.StatusOK, actualResponse.StatusCode)
+		}
+
+		actualBody := make([]byte, len(testCase.expectedBody))
+		_, err := actualResponse.Body.Read(actualBody)
+		if err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+		if string(testCase.expectedBody) != string(actualBody) {
+			t.Errorf("Mismatch respones body. Expected %s, but got %s", testCase.expectedBody, actualBody)
+		}
+	}
 }
 
 func TestServerURL(t *testing.T) {
