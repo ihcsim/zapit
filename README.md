@@ -4,9 +4,16 @@
 
 ## Table of Content
 
+* {Prerequisites}(#prerequisites)
 * [Problem Description](#problem-description)
 * [Scaling Strategy](#scaling-strategy)
 * [Development](#development)
+
+## Prerequisites
+The following is a list of software needed to run url-scanner:
+
+* Docker 17.05 CE
+* Docker Compose 1.13.0
 
 ## Problem Description
 We have an HTTP proxy that is scanning traffic looking for malware URLs. Before allowing HTTP connections to be made, this proxy asks a service that maintains several databases of malware URLs if the resource being requested is known to contain malware.
@@ -37,6 +44,12 @@ We can consider adding a load balancer in front of our service, and rely on a sc
 _**What are some strategies you might use to update the service with new URLs? Updates may be as much as 5 thousand URLs a day with updates arriving every 10 minutes.**_
 
 One approach is to consider hosting a canonical data source where all database instances pull their data from. New updates are applied to this source. They can be either pushed to or pulled by all existing databases throughout the day, at different time intervals. A naive implementation is one where the canonical data source are some data files stored in an S3 bucket. At different times throughout the day, our service replicas will download this file, delete their respective database, and re-populate their database with entries in these files.
+
+## Getting Started
+Use Docker Compose to start the system:
+```
+PORT=8080 docker-compose -p urlscanner -d up
+```
 
 ## Development
 To get the source:

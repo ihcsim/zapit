@@ -1,0 +1,18 @@
+version: '2.1'
+services:
+  server:
+    build: .
+    image: isim/url-scanner
+    environment:
+      - PORT=${PORT}
+    restart: always
+
+  lb:
+    image: nginx:1.13
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - PORT=${PORT}
+    command: /bin/bash -c "envsubst '$${PORT}' < /etc/nginx/conf.d/nginx.conf.tmpl > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+    volumes:
+      - ./bootstrap/nginx/nginx.conf.tmpl:/etc/nginx/conf.d/nginx.conf.tmpl
