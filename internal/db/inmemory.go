@@ -2,9 +2,10 @@ package db
 
 // dataSource is an in-memory table used for testing purposes.
 var dataSource = map[string]struct{}{
-	"linksk.us":     struct{}{},
-	"piknichok.ru":  struct{}{},
-	"108.61.210.89": struct{}{},
+	"linksk.us":                             struct{}{},
+	"piknichok.ru":                          struct{}{},
+	"108.61.210.89":                         struct{}{},
+	"docs.google.com?user=rogue&worm=jimbo": struct{}{},
 }
 
 // InMemoryDB represents an in-memory database.

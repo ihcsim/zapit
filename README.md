@@ -6,6 +6,7 @@
 
 * [Prerequisites](#prerequisites)
 * [Problem Description](#problem-description)
+* [Assumptions](#assumptions)
 * [Getting Started](#getting-started)
 * [Scaling Strategy](#scaling-strategy)
 * [Development](#development)
@@ -26,6 +27,11 @@ GET /urlinfo/1/{hostname_and_port}/{original_path_and_query_string}
 ```
 
 The caller wants to know if it is safe to access that URL or not. As the implementer you get to choose the response format and structure. These lookups are blocking users from accessing the URL until the caller receives a response from your service.
+
+## Assumptions
+The following is a list of assumptions made in our system:
+
+* The `{original_path_and_query_string}` segment of the request is URL-encoded
 
 ## Getting Started
 Use Docker Compose to start the system:

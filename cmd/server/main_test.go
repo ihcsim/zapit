@@ -33,6 +33,7 @@ func TestHandleURLInfo(t *testing.T) {
 			{path: "google.com", expectedBody: []byte(`{"URL":"google.com","IsSafe":true}`)},
 			{path: "piknichok.ru", expectedBody: []byte(`{"URL":"piknichok.ru","IsSafe":false}`)},
 			{path: "108.61.210.89", expectedBody: []byte(`{"URL":"108.61.210.89","IsSafe":false}`)},
+			{path: "docs.google.com%3Fuser%3Drogue%26worm%3Djimbo", expectedBody: []byte(`{"URL":"docs.google.com%3Fuser%3Drogue%26worm%3Djimbo","IsSafe":false}`)},
 		}
 
 		for _, testCase := range testCases {
@@ -56,6 +57,7 @@ func TestHandleURLInfo(t *testing.T) {
 			if err != nil {
 				t.Fatal("Unexpected error: ", err)
 			}
+
 			if string(testCase.expectedBody) != string(actualBody) {
 				t.Errorf("Mismatch respones body. Expected %s, but got %s", testCase.expectedBody, actualBody)
 			}

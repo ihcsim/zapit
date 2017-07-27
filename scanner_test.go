@@ -25,6 +25,7 @@ func TestIsSafe(t *testing.T) {
 			{url: "linksk.us", result: "unsafe", expected: false},
 			{url: "piknichok.ru", result: "unsafe", expected: false},
 			{url: "108.61.210.89", result: "unsafe", expected: false},
+			{url: "docs.google.com?user=rogue&worm=jimbo", result: "unsafe", expected: false},
 		}
 
 		for _, testCase := range testCases {

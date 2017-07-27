@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -72,8 +73,15 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 		result *urlscanner.URLInfo
 		err    error
 	)
-	url := strings.TrimPrefix(req.URL.Path, endpoint)
-	result, err = scanner.IsSafe(url)
+
+	raw := strings.TrimPrefix(req.URL.Path, endpoint)
+	unescaped, err := url.PathUnescape(raw)
+	if err != nil {
+		responseBadRequest(w, err)
+		return
+	}
+
+	result, err = scanner.IsSafe(unescaped)
 	if err != nil {
 		if urlerr.IsMalformedURLError(err) {
 			responseBadRequest(w, err)
@@ -83,6 +91,7 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	result.URL = url.QueryEscape(result.URL)
 	content, err := json.Marshal(result)
 	if err != nil {
 		responseError(w, err)
