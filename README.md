@@ -4,8 +4,9 @@
 
 ## Table of Content
 
-* {Prerequisites}(#prerequisites)
+* [Prerequisites](#prerequisites)
 * [Problem Description](#problem-description)
+* [Getting Started](#getting-started)
 * [Scaling Strategy](#scaling-strategy)
 * [Development](#development)
 
@@ -26,6 +27,12 @@ GET /urlinfo/1/{hostname_and_port}/{original_path_and_query_string}
 
 The caller wants to know if it is safe to access that URL or not. As the implementer you get to choose the response format and structure. These lookups are blocking users from accessing the URL until the caller receives a response from your service.
 
+## Getting Started
+Use Docker Compose to start the system:
+```
+PORT=8080 docker-compose -p urlscanner -d up
+```
+
 ## Scaling Strategy
 Give some thoughts to the following:
 
@@ -44,12 +51,6 @@ We can consider adding a load balancer in front of our service, and rely on a sc
 _**What are some strategies you might use to update the service with new URLs? Updates may be as much as 5 thousand URLs a day with updates arriving every 10 minutes.**_
 
 One approach is to consider hosting a canonical data source where all database instances pull their data from. New updates are applied to this source. They can be either pushed to or pulled by all existing databases throughout the day, at different time intervals. A naive implementation is one where the canonical data source are some data files stored in an S3 bucket. At different times throughout the day, our service replicas will download this file, delete their respective database, and re-populate their database with entries in these files.
-
-## Getting Started
-Use Docker Compose to start the system:
-```
-PORT=8080 docker-compose -p urlscanner -d up
-```
 
 ## Development
 To get the source:
