@@ -7,6 +7,7 @@
 * [Prerequisites](#prerequisites)
 * [Problem Description](#problem-description)
 * [Assumptions](#assumptions)
+* [System Design](#system-design)
 * [Getting Started](#getting-started)
 * [Scaling Strategy](#scaling-strategy)
 * [Development](#development)
@@ -32,6 +33,10 @@ The caller wants to know if it is safe to access that URL or not. As the impleme
 The following is a list of assumptions made in our system:
 
 * The `{original_path_and_query_string}` segment of the request is URL-encoded
+
+## System Design
+
+![System Design](https://github.com/ihcsim/url-scanner/raw/master/img/system-design.png)
 
 ## Getting Started
 Use Docker Compose to start the system:
