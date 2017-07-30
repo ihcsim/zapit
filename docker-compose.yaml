@@ -4,7 +4,8 @@ services:
     build: .
     image: isim/url-scanner
     environment:
-      - PORT=${PORT}
+      - HOSTNAME=server
+      - PORT=${SCANNER_PORT}
       - DB_SERVICE=db
       - DB_PORT=${REDIS_PORT}
     restart: always
@@ -12,9 +13,9 @@ services:
   lb:
     image: nginx:1.13
     ports:
-      - "${PORT}:${PORT}"
+      - "${SCANNER_PORT}:${SCANNER_PORT}"
     environment:
-      - PORT=${PORT}
+      - PORT=${SCANNER_PORT}
     command: /bin/bash -c "envsubst '$${PORT}' < /etc/nginx/conf.d/nginx.conf.tmpl > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     volumes:
       - ./bootstrap/nginx/nginx.conf.tmpl:/etc/nginx/conf.d/nginx.conf.tmpl
