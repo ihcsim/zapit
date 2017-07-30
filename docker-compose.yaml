@@ -5,6 +5,8 @@ services:
     image: isim/url-scanner
     environment:
       - PORT=${PORT}
+      - DB_SERVICE=db
+      - DB_PORT=${REDIS_PORT}
     restart: always
 
   lb:
@@ -16,3 +18,8 @@ services:
     command: /bin/bash -c "envsubst '$${PORT}' < /etc/nginx/conf.d/nginx.conf.tmpl > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     volumes:
       - ./bootstrap/nginx/nginx.conf.tmpl:/etc/nginx/conf.d/nginx.conf.tmpl
+
+  db:
+    image: redis:3.2.9
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}

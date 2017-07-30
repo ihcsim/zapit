@@ -77,6 +77,32 @@ func TestHandleURLInfo(t *testing.T) {
 	})
 }
 
+func TestDBHost(t *testing.T) {
+	t.Run("Default", func(t *testing.T) {
+		expected := fmt.Sprintf("%s:%s", defaultDBService, defaultDBPort)
+		if actual := dbHost(); actual != expected {
+			t.Errorf("DB host mismatch. Expected %q, but got %q", expected, actual)
+		}
+	})
+
+	t.Run("From Env", func(t *testing.T) {
+		if err := os.Setenv(envDBService, "my_db"); err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+		defer os.Unsetenv(envDBService)
+
+		if err := os.Setenv(envDBPort, "7009"); err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+		defer os.Unsetenv(envDBPort)
+
+		expected := "my_db:7009"
+		if actual := dbHost(); expected != actual {
+			t.Errorf("DB host mismatch. Expected %q, but got %q", expected, actual)
+		}
+	})
+}
+
 func TestServerURL(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		expected := ":8080"

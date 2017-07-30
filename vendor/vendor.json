@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "c6NAwR030VvTNyzOoJ8doU1oG8k=",
+			"path": "github.com/mediocregopher/radix.v2/redis",
+			"revision": "47da4d0e14739b95177d6e1e8521bb4f2ac84f59",
+			"revisionTime": "2017-07-08T20:58:50Z"
+		}
+	],
+	"rootPath": "github.com/ihcsim/url-scanner"
+}

@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+	"time"
 
 	urlscanner "github.com/ihcsim/url-scanner"
 	"github.com/ihcsim/url-scanner/internal/db"
@@ -17,26 +18,41 @@ import (
 )
 
 const (
-	endpoint    = "/urlinfo/1/"
-	defaultPort = "8080"
+	endpoint         = "/urlinfo/1/"
+	defaultPort      = "8080"
+	defaultDBService = "db"
+	defaultDBPort    = "6379"
 
-	envHostname = "HOSTNAME"
-	envPort     = "PORT"
+	envHostname  = "HOSTNAME"
+	envPort      = "PORT"
+	envDBService = "DB_SERVICE"
+	envDBPort    = "DB_PORT"
 
 	contentType = "application/json; charset=utf-8"
+
+	dbProtocol = "tcp"
+	dbTimeout  = time.Second * 2
 )
 
 var scanner *urlscanner.URLScanner
 var once sync.Once
 
 func main() {
+	// connect to db
+	dbURL := dbHost()
+	log.Printf("Connecting to database at %s", dbURL)
+	db, err := db.NewRedis(dbURL, dbProtocol, dbTimeout)
+	if err != nil {
+		log.Printf("Can't connect to db: ", err)
+		os.Exit(1)
+	}
+
 	// handle interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
-	go catchInterrupt(quit)
+	go catchInterrupt(quit, db)
 
 	// init scanner
-	db := &db.InMemoryDB{}
 	initScanner(db)
 
 	// register handler with DefaultServeMux
@@ -50,11 +66,29 @@ func main() {
 	}
 }
 
-func catchInterrupt(c <-chan os.Signal) {
+func dbHost() string {
+	service, exist := os.LookupEnv(envDBService)
+	if !exist {
+		service = defaultDBService
+	}
+
+	port, exist := os.LookupEnv(envDBPort)
+	if !exist {
+		port = defaultDBPort
+	}
+
+	return fmt.Sprintf("%s:%s", service, port)
+}
+
+func catchInterrupt(c <-chan os.Signal, db urlscanner.Database) {
 	for {
 		select {
 		case <-c:
-			log.Printf("Shutting down sever...")
+			log.Println("Shutting down server...")
+			if err := db.Close(); err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
 			os.Exit(0)
 		}
 	}

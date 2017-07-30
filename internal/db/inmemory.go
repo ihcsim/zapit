@@ -17,3 +17,8 @@ func (d *InMemoryDB) Exist(url string) (bool, error) {
 	_, exist := dataSource[url]
 	return exist, nil
 }
+
+// Close is a no-op for an in-memory databse.
+func (d *InMemoryDB) Close() error {
+	return nil
+}
