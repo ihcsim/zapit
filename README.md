@@ -39,10 +39,24 @@ The following is a list of assumptions made in our system:
 ![System Design](https://github.com/ihcsim/url-scanner/raw/master/img/system-design.png)
 
 ## Getting Started
-Use Docker Compose to start the system:
+Use Docker Compose to start the service:
 ```
-PORT=8080 docker-compose -p urlscanner -d up
+$ docker-compose -p urlscanner -d up
 ```
+
+Use `curl` to test the service:
+```
+$ curl localhost:8080/urlinfo/1/<url>
+```
+
+The following configurations can be overridden with environment variables:
+
+Variables | Descriptions
+--------- | ------------
+`SCANNER_PORT` | TCP port that the `url-scanner` listens on
+`REDIS_PORT`   | TCP port that the Redis listens on
+
+The `.env` file contains defaults that docker-compose uses.
 
 ## Scaling Strategy
 Give some thoughts to the following:
