@@ -3,6 +3,18 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "QeX/yMwm3lPpo4oOiH4cScoUv5k=",
+			"path": "github.com/alicebob/miniredis",
+			"revision": "995ba133bd8fe5dae5a34732bd99f558b0b60e1a",
+			"revisionTime": "2017-04-29T16:21:51Z"
+		},
+		{
+			"checksumSHA1": "OWl+o5XE1i01jMjCzrNYJ08/MiY=",
+			"path": "github.com/alicebob/miniredis/server",
+			"revision": "995ba133bd8fe5dae5a34732bd99f558b0b60e1a",
+			"revisionTime": "2017-04-29T16:21:51Z"
+		},
+		{
 			"checksumSHA1": "c6NAwR030VvTNyzOoJ8doU1oG8k=",
 			"path": "github.com/mediocregopher/radix.v2/redis",
 			"revision": "47da4d0e14739b95177d6e1e8521bb4f2ac84f59",

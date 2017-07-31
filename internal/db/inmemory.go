@@ -1,6 +1,12 @@
 package db
 
-// dataSource is an in-memory table used for testing purposes.
+import (
+	"bufio"
+	"io"
+	"strings"
+)
+
+// dataSource is an in-memory map used for testing purposes.
 var dataSource = map[string]struct{}{
 	"linksk.us":                             struct{}{},
 	"piknichok.ru":                          struct{}{},
@@ -14,11 +20,22 @@ type InMemoryDB struct{}
 // Exist looks for the URL in the in-memory database.
 // The return value of the error is always nil.
 func (d *InMemoryDB) Exist(url string) (bool, error) {
-	_, exist := dataSource[url]
+	arg := strings.TrimSuffix(url, "\n")
+	_, exist := dataSource[arg]
 	return exist, nil
 }
 
 // Close is a no-op for an in-memory databse.
 func (d *InMemoryDB) Close() error {
 	return nil
+}
+
+// Load inserts data from the reader into the in-memory database.
+func (d *InMemoryDB) Load(r io.Reader) error {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		dataSource[scanner.Text()] = struct{}{}
+	}
+
+	return scanner.Err()
 }
