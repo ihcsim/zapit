@@ -1,16 +1,16 @@
-package urlscanner_test
+package zapit_test
 
 import (
 	"testing"
 
-	urlscanner "github.com/ihcsim/url-scanner"
-	"github.com/ihcsim/url-scanner/internal/db"
-	urlerr "github.com/ihcsim/url-scanner/internal/error"
+	"github.com/ihcsim/zapit"
+	"github.com/ihcsim/zapit/internal/db"
+	urlerr "github.com/ihcsim/zapit/internal/error"
 )
 
 func TestIsSafe(t *testing.T) {
 	dbStore := &db.InMemoryDB{}
-	scanner := urlscanner.New(dbStore)
+	scanner := zapit.NewScanner(dbStore)
 
 	t.Run("well-formed URL", func(t *testing.T) {
 		testCases := []struct {

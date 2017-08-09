@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	urlscanner "github.com/ihcsim/url-scanner"
-	"github.com/ihcsim/url-scanner/internal/db"
-	urlerr "github.com/ihcsim/url-scanner/internal/error"
+	"github.com/ihcsim/zapit"
+	"github.com/ihcsim/zapit/internal/db"
+	urlerr "github.com/ihcsim/zapit/internal/error"
 )
 
 const (
@@ -34,7 +34,7 @@ const (
 	dbTimeout  = time.Second * 2
 )
 
-var scanner *urlscanner.URLScanner
+var scanner *zapit.Scanner
 var once sync.Once
 
 func main() {
@@ -80,7 +80,7 @@ func dbHost() string {
 	return fmt.Sprintf("%s:%s", service, port)
 }
 
-func catchInterrupt(c <-chan os.Signal, db urlscanner.Database) {
+func catchInterrupt(c <-chan os.Signal, db zapit.Database) {
 	for {
 		select {
 		case <-c:
@@ -94,9 +94,9 @@ func catchInterrupt(c <-chan os.Signal, db urlscanner.Database) {
 	}
 }
 
-func initScanner(db urlscanner.Database) {
+func initScanner(db zapit.Database) {
 	once.Do(func() {
-		scanner = urlscanner.New(db)
+		scanner = zapit.NewScanner(db)
 	})
 }
 
@@ -104,7 +104,7 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 	log.Printf("GET %s", req.URL.Path)
 
 	var (
-		result *urlscanner.URLInfo
+		result *zapit.URLInfo
 		err    error
 	)
 

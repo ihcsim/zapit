@@ -9,14 +9,14 @@ import (
 	"os"
 	"testing"
 
-	urlscanner "github.com/ihcsim/url-scanner"
-	"github.com/ihcsim/url-scanner/internal/db"
+	"github.com/ihcsim/zapit"
+	"github.com/ihcsim/zapit/internal/db"
 )
 
 func TestHandleURLInfo(t *testing.T) {
 	// set up scanner
 	db := &db.InMemoryDB{}
-	scanner = urlscanner.New(db)
+	scanner = zapit.NewScanner(db)
 
 	log.SetOutput(ioutil.Discard)
 	defer func() {

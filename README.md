@@ -1,86 +1,59 @@
-# url-scanner
+# zapit
 
 [ ![Codeship Status for ihcsim/url-scanner](https://app.codeship.com/projects/52115f30-53eb-0135-fd18-160627fc0fd3/status?branch=master)](https://app.codeship.com/projects/235123)
+
+zapit provides a scanner that checks a URL to determine if the URL is on the ZeuS Tracker's blocklists.
 
 ## Table of Content
 
 * [Prerequisites](#prerequisites)
-* [Problem Description](#problem-description)
-* [Assumptions](#assumptions)
 * [System Design](#system-design)
+* [Request Format](#request-format)
 * [Getting Started](#getting-started)
 * [Scaling Strategy](#scaling-strategy)
 * [Development](#development)
 
 ## Prerequisites
-The following is a list of software needed to run url-scanner:
+The following is a list of software needed to run zapit:
 
 * Docker 17.05 CE
 * Docker Compose 1.13.0
 
-## Problem Description
-We have an HTTP proxy that is scanning traffic looking for malware URLs. Before allowing HTTP connections to be made, this proxy asks a service that maintains several databases of malware URLs if the resource being requested is known to contain malware.
+## System Design
 
-Write a small web service, in the language/framework your choice, that responds to GET requests where the caller passes in a URL and the service responds with some information about that URL. The GET requests look like this:
+![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
+
+## Request Format
+The URL to be scanned will be appended as query string in a `GET` request as follows:
 
 ```
 GET /urlinfo/1/{hostname_and_port}/{original_path_and_query_string}
 ```
 
-The caller wants to know if it is safe to access that URL or not. As the implementer you get to choose the response format and structure. These lookups are blocking users from accessing the URL until the caller receives a response from your service.
-
-## Assumptions
-The following is a list of assumptions made in our system:
-
-* The `{original_path_and_query_string}` segment of the request is URL-encoded
-
-## System Design
-
-![System Design](https://github.com/ihcsim/url-scanner/raw/master/img/system-design.png)
-
 ## Getting Started
 Use Docker Compose to start the service:
 ```
-$ docker-compose -p urlscanner -d up
+$ docker-compose -p zapit -d up
 ```
 
 Use `curl` to test the service:
 ```
-$ curl localhost:8080/urlinfo/1/<url>
+$ curl localhost:8080/urlinfo/1/<url_to_scan>
 ```
 
 The following configurations can be overridden with environment variables:
 
 Variables | Descriptions
 --------- | ------------
-`SCANNER_PORT` | TCP port that the `url-scanner` listens on
+`SCANNER_PORT` | TCP port that the `scanner` listens on
 `REDIS_PORT`   | TCP port that the Redis listens on
 
 The `.env` file contains defaults that docker-compose uses.
 
-## Scaling Strategy
-Give some thoughts to the following:
-
-_**The size of the URL list could grow infinitely, how might you scale this beyond the memory capacity of this VM? Bonus if you implement this.**_
-
-One approach is to consider distributing the data across multiple nodes via sharding. Performance penalty will be incurred as additional time will be needed to look up the shard that hosts the requested data. We can also consider other storage solutions such as NFS or AWS EBS where we map our containers' data volumes to particular host paths, which are mounted to these external storage solutions.
-
-In addition, we can also define a data retention policy where data entries are purged from the database when they satisfy certain criteria. Examples of data expiry criteria may include after some period of time, an URL's domain no longer exists etc.
-
-If disk space is a concern, we can also investigate into data compression.
-
-_**The number of requests may exceed the capacity of this VM, how might you solve that? Bonus if you implement this.**_
-
-We can consider adding a load balancer in front of our service, and rely on a scheduler to scale our service's containers. This approach depends on the scheduler to provide the proxy abstraction to route the traffic to the container replicas.
-
-_**What are some strategies you might use to update the service with new URLs? Updates may be as much as 5 thousand URLs a day with updates arriving every 10 minutes.**_
-
-One approach is to consider hosting a canonical data source where all database instances pull their data from. New updates are applied to this source. They can be either pushed to or pulled by all existing databases throughout the day, at different time intervals. A naive implementation is one where the canonical data source are some data files stored in an S3 bucket. At different times throughout the day, our service replicas will download this file, delete their respective database, and re-populate their database with entries in these files.
-
 ## Development
 To get the source:
 ```
-$ go get github.com/ihcsim/url-scanner
+$ go get github.com/ihcsim/zapit
 ```
 
 To run the tests:
@@ -90,7 +63,7 @@ $ go test -v -cover -race ./...
 
 To build the server:
 ```
-$ go build -v github.com/ihcsim/url-scanner/cmd/server/...
+$ go build -v github.com/ihcsim/zapit/cmd/server/...
 ```
 
 To build the Docker image:

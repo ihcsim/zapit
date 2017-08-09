@@ -1,15 +1,15 @@
-package urlscanner
+package zapit
 
-import urlerr "github.com/ihcsim/url-scanner/internal/error"
+import urlerr "github.com/ihcsim/zapit/internal/error"
 
-// URLScanner provides functionality to determine if the given URLs are malicious.
-type URLScanner struct {
+// Scanner provides functionality to determine if the given URLs are malicious.
+type Scanner struct {
 	db Database
 }
 
-// New returns a new instance of a URLScanner.
-func New(db Database) *URLScanner {
-	return &URLScanner{
+// NewScanner returns a new instance of a Scanner.
+func NewScanner(db Database) *Scanner {
+	return &Scanner{
 		db: db,
 	}
 }
@@ -17,7 +17,7 @@ func New(db Database) *URLScanner {
 // IsSafe returns an URLInfo struct containing information on the given URL.
 // If the URL is a malware URL, URLInfo.IsSafe is set to true.
 // Otherwise, it's set to false.
-func (s *URLScanner) IsSafe(url string) (*URLInfo, error) {
+func (s *Scanner) IsSafe(url string) (*URLInfo, error) {
 	if url == "" {
 		return nil, &urlerr.MalformedURLError{}
 	}

@@ -1,4 +1,4 @@
-package urlscanner
+package zapit
 
 // URLInfo contains metadata of an URL.
 type URLInfo struct {

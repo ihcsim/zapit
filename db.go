@@ -1,4 +1,4 @@
-package urlscanner
+package zapit
 
 import "io"
 

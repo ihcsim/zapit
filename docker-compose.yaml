@@ -2,7 +2,7 @@ version: '2.1'
 services:
   server:
     build: .
-    image: isim/url-scanner
+    image: isim/zapit
     environment:
       - HOSTNAME=server
       - PORT=${SCANNER_PORT}
