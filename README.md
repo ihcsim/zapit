@@ -2,7 +2,23 @@
 
 [ ![Codeship Status for ihcsim/url-scanner](https://app.codeship.com/projects/52115f30-53eb-0135-fd18-160627fc0fd3/status?branch=master)](https://app.codeship.com/projects/235123)
 
-zapit provides a scanner that checks a URL to determine if the URL is on the ZeuS Tracker's blocklists.
+zapit provides a scanner that checks a URL or IP to determine if the URL is on the ZeuS Tracker's blocklists. It is made up of 4 components:
+
+* nginx proxies traffic in and out of the system.
+* scanner handles user's request by extracting the URL to be scanned from the request.
+* redis stores a list of blocked URLs obtained from [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
+* feeder polls the ZeuS Tracker website and RSS Feed for new blocked URLs
+
+![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
+
+zapit reads from the following lists:
+
+* https://zeustracker.abuse.ch/blocklist.php?download=baddomains - ZeuS domain blocklist "BadDomains"
+* https://zeustracker.abuse.ch/blocklist.php?download=badips - ZeuS IP blocklist "BadIPs"
+* https://zeustracker.abuse.ch/rss.php - This feed shows the latest twenty ZeuS hosts which the tracker has captured.
+* https://zeustracker.abuse.ch/removals.php?show=rss - This feed shows the ZeuS hosts which were removedf from the tracker list.
+
+![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
 
 ## Table of Content
 
@@ -18,10 +34,6 @@ The following is a list of software needed to run zapit:
 
 * Docker 17.05 CE
 * Docker Compose 1.13.0
-
-## System Design
-
-![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
 
 ## Request Format
 The URL to be scanned will be appended as query string in a `GET` request as follows:
