@@ -6,7 +6,7 @@ zapit provides a scanner that checks a URL or IP to determine if the URL is on t
 
 * nginx proxies traffic in and out of the system.
 * scanner handles user's request by extracting the URL to be scanned from the request.
-* redis stores a list of blocked URLs obtained from [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
+* redis stores a list of blocked URLs and IPs obtained from the [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
 * feeder polls the ZeuS Tracker website and RSS Feed for new blocked URLs
 
 ![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
@@ -17,8 +17,6 @@ zapit reads from the following lists:
 * https://zeustracker.abuse.ch/blocklist.php?download=badips - ZeuS IP blocklist "BadIPs"
 * https://zeustracker.abuse.ch/rss.php - This feed shows the latest twenty ZeuS hosts which the tracker has captured.
 * https://zeustracker.abuse.ch/removals.php?show=rss - This feed shows the ZeuS hosts which were removedf from the tracker list.
-
-![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
 
 ## Table of Content
 
