@@ -19,7 +19,7 @@ func NewScanner(db Database) *Scanner {
 // Otherwise, it's set to false.
 func (s *Scanner) IsSafe(url string) (*URLInfo, error) {
 	if url == "" {
-		return nil, &urlerr.MalformedURLError{}
+		return nil, &urlerr.MalformedURLError{URL: "\"\""}
 	}
 
 	exist, err := s.db.Exist(url)

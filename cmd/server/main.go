@@ -117,6 +117,7 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 
 	result, err = scanner.IsSafe(unescaped)
 	if err != nil {
+		log.Printf("%v\n", err)
 		if urlerr.IsMalformedURLError(err) {
 			responseBadRequest(w, err)
 			return
@@ -131,6 +132,8 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 		responseError(w, err)
 		return
 	}
+
+	log.Printf("%s\n", content)
 	responseOK(w, content)
 }
 

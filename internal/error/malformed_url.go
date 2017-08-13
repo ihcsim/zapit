@@ -7,12 +7,12 @@ import (
 
 // MalformedURLError is an error indicating that the given URL is malformed.
 type MalformedURLError struct {
-	url string
+	URL string
 }
 
 // Error returns the string representation of the error.
 func (e *MalformedURLError) Error() string {
-	return fmt.Sprintf("%s is a malformed URL", e.url)
+	return fmt.Sprintf("%s is a malformed URL", e.URL)
 }
 
 // IsMalformedURLError returns true if the given error is a MalformedURLError type.
