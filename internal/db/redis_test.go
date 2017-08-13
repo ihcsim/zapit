@@ -63,9 +63,13 @@ func TestRedisExist(t *testing.T) {
 		}
 
 		for _, testCase := range testCases {
-			_, err := client.Exist(testCase.url)
-			if err == nil {
-				t.Fatalf("Expected error didn't happen for URL %s", testCase.url)
+			exist, err := client.Exist(testCase.url)
+			if err != nil {
+				t.Fatalf("Unexpected error: ", err)
+			}
+
+			if exist {
+				t.Errorf("Expected URL %s to not exist", testCase.url)
 			}
 		}
 	})
