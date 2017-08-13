@@ -31,6 +31,9 @@ func (r *Redis) Exist(url string) (bool, error) {
 	arg := strings.TrimSuffix(url, "\n")
 	_, err := r.Cmd("GET", arg).Str()
 	if err != nil {
+		if err == redis.ErrRespNil {
+			return false, nil
+		}
 		return false, err
 	}
 
