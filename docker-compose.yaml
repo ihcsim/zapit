@@ -8,19 +8,22 @@ services:
       - PORT=${SCANNER_PORT}
       - DB_SERVICE=db
       - DB_PORT=${REDIS_PORT}
+    depends_on:
+      - db
     restart: always
 
   lb:
     image: nginx:1.13
     ports:
-      - "${SCANNER_PORT}:${SCANNER_PORT}"
+      - "${LB_PORT}:${LB_PORT}"
     environment:
-      - PORT=${SCANNER_PORT}
-    command: /bin/bash -c "envsubst '$${PORT}' < /etc/nginx/conf.d/nginx.conf.tmpl > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+      - LB_PORT=${LB_PORT}
+      - SCANNER_PORT=${SCANNER_PORT}
+    command: /bin/bash -c "envsubst '$${LB_PORT} $${SCANNER_PORT}' < /etc/nginx/conf.d/nginx.conf.tmpl > /etc/nginx/conf.d/zapit.conf && nginx -g 'daemon off;'"
     volumes:
       - ./bootstrap/nginx/nginx.conf.tmpl:/etc/nginx/conf.d/nginx.conf.tmpl
+    depends_on:
+      - server
 
   db:
     image: redis:3.2.9
-    ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
