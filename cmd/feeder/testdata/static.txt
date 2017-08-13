@@ -1,0 +1,4 @@
+## test data files
+afobal.cl
+alvoportas.com.br
+az-armaturen.su

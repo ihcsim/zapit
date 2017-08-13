@@ -16,17 +16,17 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-const (
+var (
 	defaultFeedURL = "https://zeustracker.abuse.ch/rss.php"
 
 	feedDataStartToken = "host="
 	feedDataEndToken   = "&id="
-)
 
-var defaultFilesURL = []string{
-	"https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
-	"https://zeustracker.abuse.ch/blocklist.php?download=compromised",
-}
+	defaultRemoteFiles = []string{
+		"https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
+		"https://zeustracker.abuse.ch/blocklist.php?download=compromised",
+	}
+)
 
 func main() {
 	// handle errors and interrupt signal
@@ -50,7 +50,7 @@ func main() {
 	wait.Add(1)
 	go func() {
 		defer wait.Done()
-		if err := readFromFiles(bufWriter); err != nil {
+		if err := readFromRemoteFiles(bufWriter); err != nil {
 			errChan <- fmt.Errorf("Error encountered while reading from files: %s", err)
 		}
 	}()
@@ -107,10 +107,10 @@ func readFromFeed(w io.Writer) error {
 	return nil
 }
 
-func readFromFiles(w io.Writer) error {
+func readFromRemoteFiles(w io.Writer) error {
 	var finalError error
 
-	for _, url := range defaultFilesURL {
+	for _, url := range defaultRemoteFiles {
 		resp, err := http.Get(url)
 		if err != nil {
 			finalError = fmt.Errorf("%s\n%s: %s", finalError, url, err)
