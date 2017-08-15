@@ -32,14 +32,14 @@ func TestReadFromRemoteFiles(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(handleRemoteFilesRequest))
 	defer server.Close()
 
-	defaultRemoteFilesOriginal := defaultRemoteFiles
-	defaultRemoteFiles = []string{server.URL}
+	defaultRemoteFilesOriginal := defaultFilesURL
+	defaultFilesURL = []string{server.URL}
 	defer func() {
-		defaultRemoteFiles = defaultRemoteFilesOriginal
+		defaultFilesURL = defaultRemoteFilesOriginal
 	}()
 
 	buf := &bytes.Buffer{}
-	if err := readFromRemoteFiles(buf); err != nil {
+	if err := readFromFiles(buf); err != nil {
 		t.Fatal("Unexpected error: ", err)
 	}
 

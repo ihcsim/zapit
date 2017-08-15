@@ -22,9 +22,9 @@ var (
 	feedDataStartToken = "host="
 	feedDataEndToken   = "&id="
 
-	defaultRemoteFiles = []string{
-		"https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
-		"https://zeustracker.abuse.ch/blocklist.php?download=compromised",
+	defaultFilesURL = []string{
+		"https://zeustracker.abuse.ch/blocklist.php?download=baddomains",
+		"https://zeustracker.abuse.ch/blocklist.php?download=badips",
 	}
 )
 
@@ -36,13 +36,13 @@ func main() {
 
 	// set up buffered I/O and wait groups
 	wait := sync.WaitGroup{}
-	buf := &bytes.Buffer{}
-	bufWriter := bufio.NewWriter(buf)
+	bufRSS := &bytes.Buffer{}
+	bufFiles := &bytes.Buffer{}
 
 	wait.Add(1)
 	go func() {
 		defer wait.Done()
-		if err := readFromFeed(bufWriter); err != nil {
+		if err := readFromFeed(bufRSS); err != nil {
 			errChan <- fmt.Errorf("Error encountered while reading from feed at %s: %s", defaultFeedURL, err)
 		}
 	}()
@@ -50,28 +50,14 @@ func main() {
 	wait.Add(1)
 	go func() {
 		defer wait.Done()
-		if err := readFromRemoteFiles(bufWriter); err != nil {
+		if err := readFromFiles(bufFiles); err != nil {
 			errChan <- fmt.Errorf("Error encountered while reading from files: %s", err)
 		}
 	}()
 
 	// wait for all goroutine to complete, then flush the buffered writer
 	wait.Wait()
-	if err := bufWriter.Flush(); err != nil {
-		log.Fatal("Error encountered while flushing writer buffer")
-	}
 
-	bufReader := bufio.NewReader(buf)
-	for {
-		s, err := bufReader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Println(err)
-		}
-		fmt.Printf(s)
-	}
 }
 
 func handleSignal(quit chan os.Signal, errChan chan error) {
@@ -93,12 +79,19 @@ func readFromFeed(w io.Writer) error {
 		return err
 	}
 
+	bw := bufio.NewWriter(w)
+	defer func() {
+		if err := bw.Flush(); err != nil {
+			log.Fatal("Error encountered while flushing writer buffer. ", err)
+		}
+	}()
+
 	for _, item := range feed.Items {
 		startIndex := strings.Index(item.GUID, feedDataStartToken)
 		endIndex := strings.Index(item.GUID, feedDataEndToken)
 		data := item.GUID[startIndex+len(feedDataStartToken):endIndex] + "\n"
 
-		_, err := w.Write([]byte(data))
+		_, err := bw.Write([]byte(data))
 		if err != nil {
 			return err
 		}
@@ -107,10 +100,17 @@ func readFromFeed(w io.Writer) error {
 	return nil
 }
 
-func readFromRemoteFiles(w io.Writer) error {
+func readFromFiles(w io.Writer) error {
 	var finalError error
 
-	for _, url := range defaultRemoteFiles {
+	bw := bufio.NewWriter(w)
+	defer func() {
+		if err := bw.Flush(); err != nil {
+			log.Fatal("Error encountered while flushing writer buffer. ", err)
+		}
+	}()
+
+	for _, url := range defaultFilesURL {
 		resp, err := http.Get(url)
 		if err != nil {
 			finalError = fmt.Errorf("%s\n%s: %s", finalError, url, err)
@@ -132,7 +132,7 @@ func readFromRemoteFiles(w io.Writer) error {
 			scrubbed += s + "\n"
 		}
 
-		if _, err := w.Write([]byte(scrubbed)); err != nil {
+		if _, err := bw.Write([]byte(scrubbed)); err != nil {
 			finalError = fmt.Errorf("%s\n%s: %s", finalError, url, err)
 			continue
 		}
