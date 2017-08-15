@@ -52,7 +52,7 @@ func main() {
 
 	// set up conection to redis
 	dbURL := dbHost()
-	log.Println("Connecting to database at %s", dbURL)
+	log.Printf("Connecting to database at %s", dbURL)
 	if err := initDB(dbURL); err != nil {
 		log.Fatal("Failed to initialize DB: ", err)
 	}

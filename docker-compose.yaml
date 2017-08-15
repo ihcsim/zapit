@@ -27,3 +27,14 @@ services:
 
   db:
     image: redis:3.2.9
+
+  feeder:
+    build:
+      context: .
+      dockerfile: Dockerfile-Feeder
+    image: isim/zapit-feeder
+    environment:
+      - DB_SERVICE=db
+      - DB_PORT=${REDIS_PORT}
+    depends_on:
+      - db
