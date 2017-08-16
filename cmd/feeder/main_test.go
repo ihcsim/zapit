@@ -6,9 +6,43 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/alicebob/miniredis"
 )
+
+func TestUpgradeInterval(t *testing.T) {
+	t.Run("Default", func(t *testing.T) {
+		expected := defaultDBUpdateInterval
+		actual, err := updateInterval()
+		if err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+		if expected != actual {
+			t.Error("Upgrade interval mismatch. Expected %s, but got %s", expected, actual)
+		}
+	})
+
+	t.Run("Env vars", func(t *testing.T) {
+		if err := os.Setenv(envDBUpdateInterval, "20m"); err != nil {
+			t.Fatal("Unexpected error", err)
+		}
+		defer os.Unsetenv(envDBService)
+
+		expected, err := time.ParseDuration("20m")
+		if err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+
+		actual, err := updateInterval()
+		if err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+		if actual != expected {
+			t.Errorf("Upgrade interval mismatch. Expected %s but got %s", expected, actual)
+		}
+	})
+}
 
 func TestDBHost(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {

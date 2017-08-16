@@ -7,7 +7,7 @@ zapit provides a scanner that checks a URL or IP to determine if the URL is on t
 * nginx proxies traffic in and out of the system.
 * scanner handles user's request by extracting the URL to be scanned from the request.
 * redis stores a list of blocked URLs and IPs obtained from the [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
-* feeder polls the ZeuS Tracker website and RSS Feed for new blocked URLs
+* feeder polls the ZeuS Tracker website and RSS Feed for new blocked URLs, at a configurable regular interval.
 
 ![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
 
@@ -74,6 +74,7 @@ Variables      | Descriptions                            | Defaults
 `LB_PORT`      | TCP port that nginx listens on          | 8080
 `SCANNER_PORT` | TCP port that the `scanner` listens on  | 8080
 `REDIS_PORT`   | TCP port that the Redis listens on      | 6379
+`DB_UPDATE_INTERVAL` | The time interval (in minutes) between polling the ZeuS web sites and RSS feed. Must satisfies the Go `time.Duration` format | 30m
 
 The `.env` file contains defaults that docker-compose uses.
 

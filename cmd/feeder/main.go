@@ -23,8 +23,9 @@ const (
 	defaultDBService = "db"
 	defaultDBPort    = "6379"
 
-	envDBService = "DB_SERVICE"
-	envDBPort    = "DB_PORT"
+	envDBService        = "DB_SERVICE"
+	envDBPort           = "DB_PORT"
+	envDBUpdateInterval = "DB_UPGRADE_INTERVAL"
 
 	dbProtocol = "tcp"
 	dbTimeout  = time.Second * 2
@@ -41,6 +42,8 @@ var (
 		"https://zeustracker.abuse.ch/blocklist.php?download=badips",
 	}
 
+	defaultDBUpdateInterval = time.Minute * 30
+
 	database zapit.Database
 )
 
@@ -50,11 +53,67 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	go handleSignal(quit, errChan)
 
+	for {
+		interval, err := updateInterval()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		select {
+		case t := <-time.Tick(interval):
+			log.Printf("[%s] Begin scheduled updates...", t)
+			if err := upgradeDB(errChan); err != nil {
+				log.Fatal(err)
+			}
+			log.Println("Updates completed...")
+		}
+	}
+}
+
+func handleSignal(quit chan os.Signal, errChan chan error) {
+	for {
+		select {
+		case <-quit:
+			log.Println("Terminating feeder process...")
+			if err := database.Close(); err != nil {
+				log.Fatal("Failed to close database connection: ", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
+		case err := <-errChan:
+			log.Println(err)
+		}
+	}
+}
+
+func updateInterval() (time.Duration, error) {
+	interval, exist := os.LookupEnv(envDBUpdateInterval)
+	if !exist {
+		return defaultDBUpdateInterval, nil
+	}
+	return time.ParseDuration(interval)
+}
+
+func dbHost() string {
+	service, exist := os.LookupEnv(envDBService)
+	if !exist {
+		service = defaultDBService
+	}
+
+	port, exist := os.LookupEnv(envDBPort)
+	if !exist {
+		port = defaultDBPort
+	}
+
+	return fmt.Sprintf("%s:%s", service, port)
+}
+
+func upgradeDB(errChan chan<- error) error {
 	// set up conection to redis
 	dbURL := dbHost()
 	log.Printf("Connecting to database at %s", dbURL)
 	if err := initDB(dbURL); err != nil {
-		log.Fatal("Failed to initialize DB: ", err)
+		return fmt.Errorf("Failed to connect to database at %s. %s", dbURL, err)
 	}
 
 	// set up buffered I/O and wait groups
@@ -82,44 +141,14 @@ func main() {
 	wait.Wait()
 
 	if err := database.Load(bufRSS); err != nil {
-		log.Fatal("Failed to load RSS feed data into database. ", err)
+		return fmt.Errorf("Failed to load RSS feed data into database. %s", err)
 	}
 
 	if err := database.Load(bufFiles); err != nil {
-		log.Fatal("Failed to load files data into database. ", err)
+		return fmt.Errorf("Failed to load files data into database. %s", err)
 	}
 
-	log.Println("Finish updating Redis database with new records")
-}
-
-func handleSignal(quit chan os.Signal, errChan chan error) {
-	for {
-		select {
-		case <-quit:
-			log.Println("Terminating feeder process...")
-			if err := database.Close(); err != nil {
-				log.Fatal("Failed to close database connection: ", err)
-				os.Exit(1)
-			}
-			os.Exit(0)
-		case err := <-errChan:
-			log.Println(err)
-		}
-	}
-}
-
-func dbHost() string {
-	service, exist := os.LookupEnv(envDBService)
-	if !exist {
-		service = defaultDBService
-	}
-
-	port, exist := os.LookupEnv(envDBPort)
-	if !exist {
-		port = defaultDBPort
-	}
-
-	return fmt.Sprintf("%s:%s", service, port)
+	return nil
 }
 
 func initDB(host string) error {
