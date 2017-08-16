@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/alicebob/miniredis"
 	"github.com/ihcsim/zapit"
 	"github.com/ihcsim/zapit/internal/db"
 )
@@ -127,4 +128,33 @@ func TestServerURL(t *testing.T) {
 			t.Errorf("Expected server to listen at %s, but got %s", expected, actual)
 		}
 	})
+}
+
+func TestInitDBAndScanner(t *testing.T) {
+	mock, err := miniredis.Run()
+	if err != nil {
+		t.Fatal("Unexpected error: 0, err")
+	}
+
+	testURL := []string{"linksk.us", "piknichok.ru", "108.61.210.89", "docs.google.com?user=rogue&worm=jimbo"}
+	for _, url := range testURL {
+		mock.Set(url, "")
+	}
+
+	if err := initDB(mock.Addr()); err != nil {
+		t.Error("Unexpected error: ", err)
+	}
+
+	initScanner(database)
+
+	for _, url := range testURL {
+		urlInfo, err := scanner.IsSafe(url)
+		if err != nil {
+			t.Fatal("Unexpected error: ", err)
+		}
+
+		if urlInfo.IsSafe {
+			t.Error("Expected URL %q to be unsafe", url)
+		}
+	}
 }

@@ -34,26 +34,27 @@ const (
 	dbTimeout  = time.Second * 2
 )
 
-var scanner *zapit.Scanner
-var once sync.Once
+var (
+	scanner  *zapit.Scanner
+	database zapit.Database
+	once     sync.Once
+)
 
 func main() {
 	// connect to db
 	dbURL := dbHost()
 	log.Printf("Connecting to database at %s", dbURL)
-	db, err := db.NewRedis(dbURL, dbProtocol, dbTimeout)
-	if err != nil {
-		log.Printf("Can't connect to db: ", err)
-		os.Exit(1)
+	if err := initDB(dbURL); err != nil {
+		log.Fatal("Can't connect to db: ", err)
 	}
 
 	// handle interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
-	go catchInterrupt(quit, db)
+	go catchInterrupt(quit, database)
 
 	// init scanner
-	initScanner(db)
+	initScanner(database)
 
 	// register handler with DefaultServeMux
 	http.HandleFunc(endpoint, handleURLInfo)
@@ -78,6 +79,12 @@ func dbHost() string {
 	}
 
 	return fmt.Sprintf("%s:%s", service, port)
+}
+
+func initDB(host string) error {
+	var err error
+	database, err = db.NewRedis(host, dbProtocol, dbTimeout)
+	return err
 }
 
 func catchInterrupt(c <-chan os.Signal, db zapit.Database) {
