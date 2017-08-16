@@ -108,7 +108,12 @@ func initScanner(db zapit.Database) {
 }
 
 func handleURLInfo(w http.ResponseWriter, req *http.Request) {
-	log.Printf("GET %s", req.URL.Path)
+	hostname, e := os.Hostname()
+	if e != nil {
+		responseBadRequest(w, e)
+		return
+	}
+	log.Printf("[%s]: GET %s", hostname, req.URL)
 
 	var (
 		result *zapit.URLInfo
@@ -124,7 +129,6 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 
 	result, err = scanner.IsSafe(unescaped)
 	if err != nil {
-		log.Printf("%v\n", err)
 		if urlerr.IsMalformedURLError(err) {
 			responseBadRequest(w, err)
 			return

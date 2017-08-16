@@ -88,6 +88,8 @@ func main() {
 	if err := database.Load(bufFiles); err != nil {
 		log.Fatal("Failed to load files data into database. ", err)
 	}
+
+	log.Println("Finish updating Redis database with new records")
 }
 
 func handleSignal(quit chan os.Signal, errChan chan error) {

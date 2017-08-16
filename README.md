@@ -35,7 +35,6 @@ The following is a list of software needed to run zapit:
 
 ## Request Format
 The URL to be scanned will be appended as query string in a `GET` request as follows:
-
 ```
 GET /urlinfo/1/{hostname_and_port}/{original_path_and_query_string}
 ```
@@ -48,15 +47,33 @@ $ docker-compose -p zapit -d up
 
 Use `curl` to test the service:
 ```
-$ curl localhost:8080/urlinfo/1/<url_to_scan>
+$ curl localhost:8080/urlinfo/1/localhost
+{"url":"localhost","isSafe":true}
+
+$ curl localhost:8080/urlinfo/1/127.0.0.1
+{"url":"127.0.0.1","isSafe":true}
+
+$ curl localhost:8080/urlinfo/1/google.com
+{"url":"google.com","isSafe":true}
+
+$ curl localhost:8080/urlinfo/1/jjwire.biz
+{"url":"jjwire.biz","isSafe":false}
+
+$ curl localhost:8080/urlinfo/1/162.246.57.205
+{"url":"162.246.57.205","isSafe":false}
+
+$ curl localhost:8080/urlinfo/1/gmailsecurityteam.com?foo=bar&foo2=bar3
+{"url":"gmailsecurityteam.com","isSafe":false}
 ```
+Query strings must be URL-encoded.
 
 The following configurations can be overridden with environment variables:
 
-Variables | Descriptions
---------- | ------------
-`SCANNER_PORT` | TCP port that the `scanner` listens on
-`REDIS_PORT`   | TCP port that the Redis listens on
+Variables      | Descriptions                            | Defaults
+-------------- | --------------------------------------- | -------
+`LB_PORT`      | TCP port that nginx listens on          | 8080
+`SCANNER_PORT` | TCP port that the `scanner` listens on  | 8080
+`REDIS_PORT`   | TCP port that the Redis listens on      | 6379
 
 The `.env` file contains defaults that docker-compose uses.
 
