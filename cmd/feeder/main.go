@@ -133,7 +133,7 @@ func upgradeDB(errChan chan<- error) error {
 	go func() {
 		defer wait.Done()
 		if err := readFromFiles(bufFiles); err != nil {
-			errChan <- fmt.Errorf("Error encountered while reading from files: %s", err)
+			errChan <- fmt.Errorf("Error encountered while reading from files at %s: %s", err)
 		}
 	}()
 
