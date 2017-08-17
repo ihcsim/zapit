@@ -2,38 +2,41 @@
 
 [ ![Codeship Status for ihcsim/url-scanner](https://app.codeship.com/projects/52115f30-53eb-0135-fd18-160627fc0fd3/status?branch=master)](https://app.codeship.com/projects/235123)
 
-zapit provides a scanner that checks a URL or IP to determine if the URL is on the ZeuS Tracker's blocklists. It is made up of 4 components:
+zapit provides a scanner that checks a URL or IP to determine if the endpoint is on the ZeuS Tracker's blocklists.
 
-* nginx proxies traffic in and out of the system.
-* scanner handles user's request by extracting the URL to be scanned from the request.
-* redis stores a list of blocked URLs and IPs obtained from the [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
-* feeder polls the ZeuS Tracker website and RSS Feed for new blocked URLs, at a configurable regular interval.
+## Table of Content
 
-An URL or IP is marked as safe if it isn't found in zapit's database.
+* [Introduction](#introduction)
+* [Prerequisites](#prerequisites)
+* [Request Format](#request-format)
+* [Getting Started](#getting-started)
+* [Development](#development)
 
-To counter the different permutations of paths, query strings, anchors and subdomains that can be added to masquerade a malicious server's hostname, zapit performs a two-pass scan on every URL and IP it receives.
+## Introduction
 
-During the first pass, zapit strips away the URL's additional paths, query strings, anchors and subdomains in order to perform a scan on the URL's second-level domain name (or IPv4 address in case of an IP). For example, given the URLs blog.example.com and support.eu.example.com, the example.com domain name will be scanned.
+zapit is made up of 4 components:
 
-If the first pass returns a negative (safe) result, then a second pass is triggered. During the second pass, zapit scans the URL's domain name with its original subdomains and paths intact. If the URL passed the second scan, then it's marked as safe.
+* Nginx proxies traffic into the system.
+* Scanner performs the scan on the submitted endpoint.
+* Redis stores a list of blocked endpoints obtained from the [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
+* Feeder polls the ZeuS Tracker website and RSS feed for new blocked URLs, at a configurable regular interval.
 
 ![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
+An endpoint is marked as safe if it isn't found in zapit's database.
+
+To counter the different permutations of paths, query strings, anchors and subdomains that can be added to masquerade a malicious server's hostname, zapit performs a two-pass scan on every endpoint it receives.
+
+During the first pass, zapit strips away the endpoint's additional paths, query strings, anchors and subdomains in order to perform a scan on either the URL's second-level domain name or the IPv4 address. For example, given the URLs blog.example.com and support.eu.example.com, the example.com domain name will be scanned. The general idea is that if a domain is marked as unsafe, all its subdomains and paths will be unsafe.
+
+If the first pass returns a positive result, indicating that the domain is safe, then a second pass is triggered. During the second pass, zapit scans the endpoint with its submitted subdomains and paths intact. If the endpoint passed the second scan, then it's marked as safe.
+
+The feeder is scheduled to read from the ZeuS Tracker site every 30 minutes, and update the Redis database accordingly.
 
 zapit reads the blocked lists from the following sites:
 
 * https://zeustracker.abuse.ch/blocklist.php?download=baddomains - ZeuS domain blocklist "BadDomains"
 * https://zeustracker.abuse.ch/blocklist.php?download=badips - ZeuS IP blocklist "BadIPs"
 * https://zeustracker.abuse.ch/rss.php - This feed shows the latest twenty ZeuS hosts which the tracker has captured.
-* https://zeustracker.abuse.ch/removals.php?show=rss - This feed shows the ZeuS hosts which were removedf from the tracker list.
-
-## Table of Content
-
-* [Prerequisites](#prerequisites)
-* [System Design](#system-design)
-* [Request Format](#request-format)
-* [Getting Started](#getting-started)
-* [Scaling Strategy](#scaling-strategy)
-* [Development](#development)
 
 ## Prerequisites
 The following is a list of software needed to run zapit:
