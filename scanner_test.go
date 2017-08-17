@@ -61,4 +61,25 @@ func TestIsSafe(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("Good domains with malicious content", func(t *testing.T) {
+		testCases := []struct {
+			url      string
+			result   string
+			expected bool
+		}{
+			{url: "docs.google.com/document/d/malicious_document_1", result: "unsafe", expected: false},
+		}
+
+		for _, testCase := range testCases {
+			actual, err := scanner.IsSafe(testCase.url)
+			if err != nil {
+				t.Fatal("Unexpected error: ", err)
+			}
+
+			if actual.IsSafe != testCase.expected {
+				t.Errorf("Expected URL %s to be %s", testCase.url, testCase.result)
+			}
+		}
+	})
 }

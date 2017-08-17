@@ -64,18 +64,6 @@ func TestHandleURLInfo(t *testing.T) {
 			}
 		}
 	})
-
-	t.Run("400 Bad Request", func(t *testing.T) {
-		path := fmt.Sprintf("%s%s", endpoint, "")
-		testRequest := httptest.NewRequest("GET", path, nil)
-		testResponseWriter := httptest.NewRecorder()
-		handleURLInfo(testResponseWriter, testRequest)
-
-		actualResponse := testResponseWriter.Result()
-		if actualResponse.StatusCode != http.StatusBadRequest {
-			t.Errorf("Mismatch HTTP response status code. Expected %d, but got %d", http.StatusBadRequest, actualResponse.StatusCode)
-		}
-	})
 }
 
 func TestDBHost(t *testing.T) {

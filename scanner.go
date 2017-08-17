@@ -24,9 +24,23 @@ func NewScanner(db Database) *Scanner {
 // If the URL is a malware URL, URLInfo.IsSafe is set to true.
 // Otherwise, it's set to false.
 func (s *Scanner) IsSafe(url string) (*URLInfo, error) {
-	exist, err := s.db.Exist(s.domain(url))
+	var (
+		exist bool
+		err   error
+	)
+
+	// check if domain is safe
+	exist, err = s.db.Exist(s.domain(url))
 	if err != nil {
 		return nil, err
+	}
+
+	// if domain is safe, check to see if the full URL with its additional path, query strings and anchors is safe
+	if !exist {
+		exist, err = s.db.Exist(url)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &URLInfo{URL: url, IsSafe: !exist}, nil

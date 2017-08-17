@@ -9,9 +9,17 @@ zapit provides a scanner that checks a URL or IP to determine if the URL is on t
 * redis stores a list of blocked URLs and IPs obtained from the [ZeuS Tracker](https://zeustracker.abuse.ch/blocklist.php).
 * feeder polls the ZeuS Tracker website and RSS Feed for new blocked URLs, at a configurable regular interval.
 
+An URL or IP is marked as safe if it isn't found in zapit's database.
+
+To counter the different permutations of paths, query strings, anchors and subdomains that can be added to masquerade a malicious server's hostname, zapit performs a two-pass scan on every URL and IP it receives.
+
+During the first pass, zapit strips away the URL's additional paths, query strings, anchors and subdomains in order to perform a scan on the URL's second-level domain name (or IPv4 address in case of an IP). For example, given the URLs blog.example.com and support.eu.example.com, the example.com domain name will be scanned.
+
+If the first pass returns a negative (safe) result, then a second pass is triggered. During the second pass, zapit scans the URL's domain name with its original subdomains and paths intact. If the URL passed the second scan, then it's marked as safe.
+
 ![System Design](https://github.com/ihcsim/zapit/raw/master/img/system-design.png)
 
-zapit reads from the following lists:
+zapit reads the blocked lists from the following sites:
 
 * https://zeustracker.abuse.ch/blocklist.php?download=baddomains - ZeuS domain blocklist "BadDomains"
 * https://zeustracker.abuse.ch/blocklist.php?download=badips - ZeuS IP blocklist "BadIPs"
