@@ -14,7 +14,6 @@ import (
 
 	"github.com/ihcsim/zapit"
 	"github.com/ihcsim/zapit/internal/db"
-	urlerr "github.com/ihcsim/zapit/internal/error"
 )
 
 const (
@@ -129,7 +128,7 @@ func handleURLInfo(w http.ResponseWriter, req *http.Request) {
 
 	result, err = scanner.IsSafe(unescaped)
 	if err != nil {
-		if urlerr.IsMalformedURLError(err) {
+		if zapit.IsMalformedURLError(err) {
 			responseBadRequest(w, err)
 			return
 		}
