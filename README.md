@@ -2,6 +2,7 @@
 
 [ ![Codeship Status for ihcsim/url-scanner](https://app.codeship.com/projects/52115f30-53eb-0135-fd18-160627fc0fd3/status?branch=master)](https://app.codeship.com/projects/235123)
 
+[![buddy pipeline](https://app.buddy.works/ihcsim/zapit/pipelines/pipeline/58248/badge.svg?token=a4e6f4e142f7c03b31711b30f8217b8915a52381c4ab1102a43ae0ab6d2ff978 "buddy pipeline")](https://app.buddy.works/ihcsim/zapit/pipelines/pipeline/58248)
 zapit provides a scanner that checks a URL or IP to determine if the endpoint is on the ZeuS Tracker's blocklists.
 
 ## Table of Content
